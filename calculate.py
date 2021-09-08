@@ -1,5 +1,5 @@
 import numpy as np
-
+    
 
 L = 50
 profiles = [
@@ -52,8 +52,12 @@ def run():
             height = cord[1,start-1]
     cord[1,start:] = 0
 
-
-"""plt.plot(cord[0,0:],cord[1])
+if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+    run()
+    plt.plot(cord[0,0:],cord[1])
+    plt.show()
+"""
 plt.savefig('figures/save.png')"""
     
 
