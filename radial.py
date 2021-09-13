@@ -16,7 +16,7 @@ def const_acc (deg,type,L,cam_r) -> int:
 def dwell(deg,h) -> int:
     return np.full((1,deg),h)
 
-def run(val):
+def run(val, mode="normal"):
     cord = np.zeros((2,val["pnt"]))
     cord[0,0:] = np.arange(0,np.radians(val["pnt"]),np.radians(1))
     L = val["L"]
@@ -32,4 +32,7 @@ def run(val):
             start+=profile['deg']
             height = cord[1,start-1]
     cord[1,start:] = val["cam_r"]
-    return cord[0,0:], cord[1]
+    if mode == "normal":
+        return cord[0,0:], cord[1]
+    else:
+        return cord

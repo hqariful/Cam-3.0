@@ -1,10 +1,13 @@
 import base64
 from io import BytesIO
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_from_directory
 from matplotlib.figure import Figure
+import numpy as np
+import os
 import radial, fdisp
 
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path,"uploads")
 
 value = {
     "L":None,
@@ -39,15 +42,14 @@ def home():
         value["L"] = float(request.form['flw'])
         value['profiles'][0]['motion'] = request.form.get('otype')
         value['profiles'][2]['motion'] = request.form.get('rtype')
-        print(value)
-        xr, yr = radial.run(value)
-        x, y = fdisp.run(value)
+        rcord = radial.run(value)
+        cord = fdisp.run(value)
         fig = Figure()
         ax = fig.subplots(subplot_kw={'projection': 'polar'})
-        ax.plot(xr,yr)
+        ax.plot(rcord[0],rcord[1])
         fig2 = Figure()
         ax2 = fig2.subplots()
-        ax2.plot(x,y)
+        ax2.plot(cord[0],cord[1])
         # Save it to a temporary buffer.
         buf = BytesIO()
         buf2 = BytesIO()
@@ -63,27 +65,20 @@ def home():
 def about():
     return render_template('about.html')
 
+@app.route('/instruction')
+def inst():
+    return render_template('instruction.html')
+
+@app.route('/download')
+def download():
+    rcord = radial.run(value)
+    cord = fdisp.run(value)
+    result = np.append(cord,rcord,axis=0)
+    result = np.transpose(result)
+    uploads = app.config['UPLOAD_FOLDER']
+    np.savetxt("./uploads/buffer.csv",result,delimiter=',',header="angle in degree, follower displacement, angle in radian, cam radial distance")
+    return send_from_directory(path="buffer.csv",directory=uploads,as_attachment=True)
+    
+
 if __name__ == '__main__':
     app.run(debug=True)
-
-"""import base64
-from io import BytesIO
-
-from flask import Flask
-from matplotlib.figure import Figure
-
-app = Flask(__name__)
-
-
-@app.route("/")
-def hello():
-    # Generate the figure **without using pyplot**.
-    fig = Figure()
-    ax = fig.subplots()
-    ax.plot([1, 2])
-    # Save it to a temporary buffer.
-    buf = BytesIO()
-    fig.savefig(buf, format="png")
-    # Embed the result in the html output.
-    data = base64.b64encode(buf.getbuffer()).decode("ascii")
-    return f"<img src='data:image/png;base64,{data}'/>"""
