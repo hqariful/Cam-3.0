@@ -10,18 +10,21 @@ value = {
     "L":None,
     "cam_r":None,
     "pnt":360,
+    "offset":0,
     "profiles":[
     {
         'type':'outStroke',
-        'deg':160
+        'deg':None,
+        'motion':None
     },
     {
         'type':'dwell',
-        'deg':60
+        'deg':None
     },
     {
         'type':'returnStroke',
-        'deg':80
+        'deg':None,
+        'motion':None
     }
     ]
 }
@@ -34,6 +37,9 @@ def home():
         value["profiles"][2]['deg'] = int(request.form['rtnStroke'])
         value["cam_r"] = int(request.form['brad'])
         value["L"] = float(request.form['flw'])
+        value['profiles'][0]['motion'] = request.form.get('otype')
+        value['profiles'][2]['motion'] = request.form.get('rtype')
+        print(value)
         xr, yr = radial.run(value)
         x, y = fdisp.run(value)
         fig = Figure()
@@ -52,6 +58,10 @@ def home():
         data2 = base64.b64encode(buf2.getbuffer()).decode("ascii")
         return render_template('view.html',img=f"data:image/png;base64,{data}",img2=f"data:image/png;base64,{data2}")
     return render_template('home.html')
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

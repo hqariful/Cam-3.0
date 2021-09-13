@@ -1,33 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cam</title>
-</head>
-<body>
-    <center><h1>Cam Profile Generator</h1></center>
-    <div><a href="/">HOME</a></div>
-    <div><form action="/" method="POST">
-        <label for="OutStroke">Out Stroke</label>
-        <input name = "outStroke" type="number">,<br>
+{% extends "layout.html" %}
+
+{% block content %}
+    <div class="container"><form action="/" method="POST">
+        <div class="input-group mb-3">
+            <label class="form-label" for="OutStroke">Out Stroke : </label>
+            <input required class="form-control" name = "outStroke" type="number">
+            <div>
+                <select class="form-select" name="otype" id="otype">
+                    <option value="const_acc">Constant Acceleration</option>
+                    <option disabled value="shm">Simple Harmonic Motion</option>
+                    <option disabled value="cyc">Cyloidal Motion</option>
+                </select>
+            </div>
+        </div>
         
-        <label for="dwell">Dwell</label>
-        <input name = "dwell" type="number"><br>
-
-        <label for="Return Stroke">Return Stroke</label>
-        <input name = "rtnStroke" type="number"><br>
-
-        <label for="flw">Follower Displacement</label>
-        <input name = "flw" type="number"><br>
-
-        <label for="flw">Base Circle Radius</label>
-        <input name = "brad" type="number"><br>
-
-        <button type="submit">Submit</button>
+        <div class="input-group mb-3">
+            <label class="form-label" for="dwell">Dwell</label>
+            <input required class="form-control" name = "dwell" type="number">
+        </div>
+        
+        <div class="input-group mb-3">
+            <label class="form-label" for="Return Stroke">Return Stroke : </label>
+            <input required class="form-control" name = "rtnStroke" type="number">
+            <div>
+                <select class="form-select" name="rtype" id="rtype">
+                    <option value="const_acc">Constant Acceleration</option>
+                    <option disabled value="shm">Simple Harmonic Motion</option>
+                    <option disabled value="cyc">Cyloidal Motion</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="input-group mb-3">
+            <label class="form-label" for="flw">Follower Displacement : </label>
+            <input required class="form-control" name = "flw" type="number">
+        </div>
+        
+        <div class="input-group mb-3">
+            <label class="form-label" for="flw">Base Circle Radius : </label>
+            <input required class="form-control" name = "brad" type="number">
+        </div>
+        
+        <div class="input-group mb-3">
+            <label class="form-label" for="offset">Offset : </label>
+            <input disabled class="form-control" name = "offset" type="number">
+        </div>
+        
+        <button class="btn btn-primary" type="submit">Submit</button>
     </form></div>
-    
-    
-</body>
-</html>
+{% endblock %}

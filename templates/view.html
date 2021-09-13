@@ -1,20 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <a href="/">HOME</a>
-    <figure>
-        <img src="{{ img2 }}" alt="follower displacement" style="width:100%">
-        <figcaption>Follower Displacement</figcaption>
-    </figure>
-    <figure>
-        <img src="{{ img }}" alt="follower displacement" style="width:100%">
-        <figcaption>Cam Profile</figcaption>
-    </figure>
-</body>
-</html>
+{% extends "layout.html" %}
+
+{% block content %}
+<figure>
+    <img src="{{ img2 }}" alt="follower displacement" style="width:100%">
+    <figcaption>Follower Displacement</figcaption>
+</figure>
+<figure>
+    <img src="{{ img }}" alt="follower displacement" style="width:100%">
+    <figcaption>Cam Profile</figcaption>
+</figure>
+{% endblock %}
