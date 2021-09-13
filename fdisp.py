@@ -1,18 +1,11 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
-from value import profiles, L, pnt
-
-cord = np.zeros((2,pnt))
-cord[0,0:] = np.arange(0,pnt,1)
-#cord[0,0:] = np.arange(0,np.radians(pnt),np.radians(1))
-
-def const_acc (deg,type) -> int:
+def const_acc (deg,type,L) -> int:
     if type == "outStroke":
         mul = 2*L/deg**2
         x = np.arange(0,deg,1)
         y = np.where(x<deg/2,mul*x**2,L*(1-2*(1-x/deg)**2))
-        #r = np.where(x<deg/2,cam_r+mul*x**2,cam_r+L*(1-2*(1-x/deg)**2))
+        #r = np.where(x<deg/2,cam_r+mul*x**2,cam_r+val["L"]*(1-2*(1-x/deg)**2))
         return y
     elif type == "returnStroke":
         x = np.arange(0,deg,1)
@@ -22,22 +15,20 @@ def const_acc (deg,type) -> int:
 def dwell(deg,h) -> int:
     return np.full((1,deg),h)
 
-def run():
+def run(val):
+    cord = np.zeros((2,val["pnt"]))
+    cord[0,0:] = np.arange(0,val["pnt"],1)
     start = 0
     height = 0
-    for profile in profiles:
+    L = val["L"]
+    for profile in val["profiles"]:
         if profile['type'] == 'dwell':
             cord[1,start:start+profile['deg']] = dwell(profile['deg'],height)
             start+=profile['deg']
         else:
-            cord[1,start:start+profile['deg']] = const_acc(profile['deg'],profile['type'])
+            cord[1,start:start+profile['deg']] = const_acc(profile['deg'],profile['type'],L)
             start+=profile['deg']
             height = cord[1,start-1]
     cord[1,start:] = 0
-
-"""def start():
-    run()
-    #fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
-    plt.plot(cord[0,0:],cord[1])
-    plt.show()"""
+    return cord[0,0:], cord[1]
 

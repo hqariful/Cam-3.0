@@ -2,26 +2,46 @@ import base64
 from io import BytesIO
 from flask import Flask, render_template, request
 from matplotlib.figure import Figure
-import radial, fdisp, value
-
+import radial, fdisp
 
 app = Flask(__name__)
+
+value = {
+    "L":None,
+    "cam_r":None,
+    "pnt":360,
+    "profiles":[
+    {
+        'type':'outStroke',
+        'deg':160
+    },
+    {
+        'type':'dwell',
+        'deg':60
+    },
+    {
+        'type':'returnStroke',
+        'deg':80
+    }
+    ]
+}
 
 @app.route('/', methods=['GET','POST'])
 def home():
     if request.method == "POST":
-        value.profiles[0]['deg'] = int(request.form['outStroke'])
-        value.profiles[1]['deg'] = int(request.form['dwell'])
-        value.profiles[2]['deg'] = int(request.form['rtnStroke'])
-        value.L = float(request.form['flw'])
-        radial.run()
-        fdisp.run()
+        value["profiles"][0]['deg'] = int(request.form['outStroke'])
+        value["profiles"][1]['deg'] = int(request.form['dwell'])
+        value["profiles"][2]['deg'] = int(request.form['rtnStroke'])
+        value["cam_r"] = int(request.form['brad'])
+        value["L"] = float(request.form['flw'])
+        xr, yr = radial.run(value)
+        x, y = fdisp.run(value)
         fig = Figure()
         ax = fig.subplots(subplot_kw={'projection': 'polar'})
-        ax.plot(radial.cord[0,0:],radial.cord[1])
+        ax.plot(xr,yr)
         fig2 = Figure()
         ax2 = fig2.subplots()
-        ax2.plot(fdisp.cord[0,0:],fdisp.cord[1])
+        ax2.plot(x,y)
         # Save it to a temporary buffer.
         buf = BytesIO()
         buf2 = BytesIO()

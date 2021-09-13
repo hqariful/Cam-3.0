@@ -1,13 +1,7 @@
+from types import CodeType
 import numpy as np
-import matplotlib.pyplot as plt
 
-from value import profiles, L, pnt, cam_r
-
-cord = np.zeros((2,pnt))
-#cord[0,0:] = np.arange(0,pnt,1)
-cord[0,0:] = np.arange(0,np.radians(pnt),np.radians(1))
-
-def const_acc (deg,type) -> int:
+def const_acc (deg,type,L,cam_r) -> int:
     if type == "outStroke":
         mul = 2*L/deg**2
         x = np.arange(0,deg,1)
@@ -22,21 +16,20 @@ def const_acc (deg,type) -> int:
 def dwell(deg,h) -> int:
     return np.full((1,deg),h)
 
-def run():
+def run(val):
+    cord = np.zeros((2,val["pnt"]))
+    cord[0,0:] = np.arange(0,np.radians(val["pnt"]),np.radians(1))
+    L = val["L"]
+    cam_r = val["cam_r"]
     start = 0
     height = 0
-    for profile in profiles:
+    for profile in val["profiles"]:
         if profile['type'] == 'dwell':
             cord[1,start:start+profile['deg']] = dwell(profile['deg'],height)
             start+=profile['deg']
         else:
-            cord[1,start:start+profile['deg']] = const_acc(profile['deg'],profile['type'])
+            cord[1,start:start+profile['deg']] = const_acc(profile['deg'],profile['type'],L,cam_r)
             start+=profile['deg']
             height = cord[1,start-1]
-    cord[1,start:] = cam_r
-
-"""def start():
-    run()
-    fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
-    ax.plot(cord[0,0:],cord[1])
-    plt.show()"""
+    cord[1,start:] = val["cam_r"]
+    return cord[0,0:], cord[1]
