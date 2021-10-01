@@ -8,6 +8,7 @@ import radial, fdisp
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path,"uploads")
+np.set_printoptions(suppress=True,precision=3)
 
 value = {
     "L":None,
@@ -46,10 +47,21 @@ def home():
         cord = fdisp.run(value)
         fig = Figure()
         ax = fig.subplots(subplot_kw={'projection': 'polar'})
-        ax.plot(rcord[0],rcord[1])
+        ax.set_title("Cam profile")
+        ax.plot([0,0],[0,value["cam_r"]+value["L"]],color='teal',ls='--')
+        ax.plot([0,np.radians(value["profiles"][0]['deg'])],[0,value["cam_r"]+value["L"]],color='teal',ls='--')
+        ax.plot([0,np.radians(value["profiles"][1]['deg']+value["profiles"][0]['deg'])],[0,value["cam_r"]+value["L"]],color='teal',ls='--')
+        #ax.plot([0,np.radians(value["profiles"][0]['deg']+value["profiles"][1]['deg']+value["profiles"][2]['deg'])],[0,value["cam_r"]+value["L"]],color='blue')
+        ax.plot(np.linspace(0, 2*np.pi, 100), np.ones(100)*value['cam_r'], color='r', linestyle='--')
+        ax.plot(rcord[0],rcord[1],color='#ff7f0e')
         fig2 = Figure()
         ax2 = fig2.subplots()
-        ax2.plot(cord[0],cord[1])
+        ax2.set_title('Follower Displacement')
+        ax2.set_xlabel('angle in degree')
+        ax2.set_ylabel('Displacement')
+        ax2.axvline(x=value["profiles"][0]['deg'],ymin=0,ymax=value["L"],color='teal',ls='--')
+        ax2.axvline(x=value["profiles"][0]['deg']+value["profiles"][1]['deg'],ymin=0,ymax=value["L"],color='teal',ls='--')
+        ax2.plot(cord[0],cord[1],color='#ff7f0e')
         # Save it to a temporary buffer.
         buf = BytesIO()
         buf2 = BytesIO()
@@ -71,13 +83,14 @@ def inst():
 
 @app.route('/download')
 def download():
-    rcord = radial.run(value)
-    cord = fdisp.run(value)
-    result = np.append(cord,rcord,axis=0)
-    result = np.transpose(result)
+    rcord = np.transpose(radial.run(value))
+    cord = np.transpose(fdisp.run(value))
+    zero = np.zeros((360,1),dtype=int)
+    result = np.append(cord,zero,axis=1)
     uploads = app.config['UPLOAD_FOLDER']
-    np.savetxt("./uploads/buffer.csv",result,delimiter=',',header="angle in degree, follower displacement, angle in radian, cam radial distance")
-    return send_from_directory(path="buffer.csv",directory=uploads,as_attachment=True)
+    np.savetxt("./uploads/cam_displacement.csv",result,delimiter=',',fmt='%.3f')
+    np.savetxt("./uploads/radial.csv",rcord,delimiter=',',fmt='%.3f')
+    return send_from_directory(path="cam_displacement.csv",directory=uploads,as_attachment=True)
     
 
 if __name__ == '__main__':

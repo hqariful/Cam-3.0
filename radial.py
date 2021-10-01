@@ -17,6 +17,7 @@ def dwell(deg,h) -> int:
     return np.full((1,deg),h)
 
 def run(val, mode="normal"):
+    np.set_printoptions(suppress=True,precision=3)
     cord = np.zeros((2,val["pnt"]))
     cord[0,0:] = np.arange(0,np.radians(val["pnt"]),np.radians(1))
     L = val["L"]
