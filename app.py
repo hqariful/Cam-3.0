@@ -1,7 +1,7 @@
 import base64
 from io import BytesIO
 from flask import Flask, render_template, request, send_from_directory
-from calc import np, Figure, strand, linToRadi
+from calc import np, Figure, strand
 import os
 
 app = Flask(__name__)
@@ -22,7 +22,7 @@ value = {
     {
         'type':'dwell',
         'deg':None,
-        'pnt':10,
+        'pnt':20,
         'max':True
     },
     {
@@ -34,7 +34,7 @@ value = {
     {
         'type':'dwell',
         'deg':None,
-        'pnt':10,
+        'pnt':20,
         'max':False
     }
     ]
@@ -56,25 +56,26 @@ def home():
         value['profiles'][0]['motion'] = request.form.get('otype')
         value['profiles'][2]['motion'] = request.form.get('rtype')
         
-        lcord = strand(value)
-        rcord = linToRadi(value,strand(value))
+        cord = strand(value)
         fig = Figure()
         ax = fig.subplots()
         ax.set_title("Cam profile")
+        r = value["cam_r"]+value["L"]
+        ax.plot([0,r-value["L"]],[0,0],color='teal',ls='--')
+        ax.plot([0,r*np.cos(out)],[0,r*np.sin(out)],color='teal',ls='--')
+        ax.plot([0,r*np.cos(out+dw)],[0,r*np.sin(out+dw)],color='teal',ls='--')
+        ax.plot([0,(r-value["L"])*np.cos(out+dw+rtn)],[0,(r-value["L"])*np.sin(out+dw+rtn)],color='teal',ls='--')
+        ax.plot(value["cam_r"]*np.cos(np.linspace(0, 2*np.pi, 100)), value["cam_r"]*np.sin(np.linspace(0, 2*np.pi, 100)), color='r', linestyle='--')
+        ax.plot(cord[2],cord[3],color='#ff7f0e')
         ax.set_aspect('equal', adjustable='box')
-        #ax.plot([0,np.radians(value["profiles"][0]['deg'])],[0,value["cam_r"]+value["L"]],color='teal',ls='--')
-        # ax.plot([0,np.radians(value["profiles"][1]['deg']+value["profiles"][0]['deg'])],[0,value["cam_r"]+value["L"]],color='teal',ls='--')
-        # ax.plot([0,np.radians(value["profiles"][0]['deg']+value["profiles"][1]['deg']+value["profiles"][2]['deg'])],[0,value["cam_r"]+value["L"]],color='blue')
-        # ax.plot(np.linspace(0, 2*np.pi, 100), np.ones(100)*value['cam_r'], color='r', linestyle='--')
-        ax.plot(rcord[0],rcord[1],color='#ff7f0e')
         fig2 = Figure()
         ax2 = fig2.subplots()
         ax2.set_title('Follower Displacement')
         ax2.set_xlabel('angle in degree')
         ax2.set_ylabel('Displacement')
-        # ax2.axvline(x=value["profiles"][0]['deg'],ymin=0,ymax=value["L"],color='teal',ls='--')
-        # ax2.axvline(x=value["profiles"][0]['deg']+value["profiles"][1]['deg'],ymin=0,ymax=value["L"],color='teal',ls='--')
-        ax2.plot(lcord[0],lcord[1],color='#ff7f0e')
+        ax2.axvline(x=value["profiles"][0]['deg'],ymin=0,ymax=value["L"],color='teal',ls='--')
+        ax2.axvline(x=value["profiles"][0]['deg']+value["profiles"][1]['deg'],ymin=0,ymax=value["L"],color='teal',ls='--')
+        ax2.plot(cord[0],cord[1],color='#ff7f0e')
         # Save it to a temporary buffer.
         buf = BytesIO()
         buf2 = BytesIO()
@@ -96,7 +97,7 @@ def inst():
 
 @app.route('/download')
 def download():
-    result = np.transpose(linToRadi(value,strand(value)))
+    result = np.transpose(strand(value))
     uploads = app.config['UPLOAD_FOLDER']
     np.savetxt("./uploads/radial.csv",result,delimiter=',',fmt='%.3f')
     return send_from_directory(path="radial.csv",directory=uploads,as_attachment=True)

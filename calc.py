@@ -2,38 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 
-# value = {
-#     "L":50,
-#     "cam_r":30,
-#     "offset":0,
-#     "profiles":[
-#     {
-#         'type':'outStroke',
-#         'deg':np.deg2rad(100),
-#         'motion':"const_a",
-#         "pnt":100
-#     },
-#     {
-#         'type':'dwell',
-#         'deg':np.deg2rad(80),
-#         'pnt':100
-#     },
-#     {
-#         'type':'returnStroke',
-#         'deg':np.deg2rad(100),
-#         'motion':"const_a",
-#         "pnt":100
-#     },
-#     {
-#         'type':'dwell',
-#         'deg':None,
-#         'pnt':100
-#     }
-#     ]
-# }
-
-
-
 
 #making follower strand
 def strand(value):
@@ -93,37 +61,86 @@ def strand(value):
 
     for i in prof:
         if firstTime:
+            #print("firstTime")
             cord = make(i,prevAng)
+            #print("\n  cord\n",cord)
             sum = np.copy(cord)
-            #print("sum\n",sum,"\ncord\n",cord)
+            #print("\n  sum\n",sum)
         else:
             cord = make(i,prevAng)
+            #print("\n  cord\n",cord)
             sum = np.concatenate((sum, cord), axis=1)
-            #print("\nsum\n",sum,"\ncord\n",cord)
+            #print("\n  sum\n",sum)
         firstTime = False
         prevAng = prevAng + i["deg"]
-    print(sum)
+    #   MAKE RADIAL CAM PROFILE
+    row, col = np.shape(sum)
+    buf = np.zeros((2,col))
+    buf[0,0:] = (sum[1]+value["cam_r"])*np.cos(sum[0])
+    buf[1,0:] = (sum[1]+value["cam_r"])*np.sin(sum[0])
+    sum = np.concatenate((sum,buf),axis=0)
     return sum
 
 
-#   MAKE RADIAL CAM PROFILE
-def linToRadi(value,strand):
-    row, col = np.shape(strand)
-    rcord = np.zeros((2,col))
-    t = np.linspace(0,np.deg2rad(360),col)
-    rcord[0,0:] = (strand[1]+value["cam_r"])*np.cos(t)
-    rcord[1,0:] = (strand[1]+value["cam_r"])*np.sin(t)
-    return rcord
+
     # fig = plt.figure()
     # ax = fig.add_subplot(111)
     # ax.set_aspect('equal', adjustable='box')
     # plt.plot(rcord[0],rcord[1])
     # plt.show()
 
-#   CALLING THE CALCULATION FOR FOLLOWER DISPLACEMENT
-#   2ND PARAMETER DEFINES IF WE WANT CAM PROFILE OR FOLLOWER DISPLACEMENT 
-#   >> TRUE MEANS CAM PROFILE
-#strand(value,True)
+if __name__ == "__main__":
+    value = {
+        "L":30,
+        "cam_r":50,
+        "offset":0,
+        "profiles":[
+        {
+            'type':'outStroke',
+            'deg':np.deg2rad(30),
+            'motion':'const_a',
+            "pnt":50
+        },
+        {
+            'type':'dwell',
+            'deg':np.deg2rad(30),
+            'pnt':20,
+            'max':True
+        },
+        {
+            'type':'returnStroke',
+            'deg':np.deg2rad(50),
+            'motion':'const_a',
+            "pnt":50
+        },
+        {
+            'type':'dwell',
+            'deg':None,
+            'pnt':20,
+            'max':False
+        }
+        ]
+    }
+    out = value["profiles"][0]['deg']
+    dw = value["profiles"][1]['deg']
+    rtn = value["profiles"][2]['deg']
+    value["profiles"][3]['deg'] = 2*np.pi - (out+dw+rtn)
+    #print(value)
+    #   CALLING THE CALCULATION FOR FOLLOWER DISPLACEMENT
+    #   2ND PARAMETER DEFINES IF WE WANT CAM PROFILE OR FOLLOWER DISPLACEMENT 
+    #   >> TRUE MEANS CAM PROFILE
+    cord = strand(value)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(cord[2],cord[3])
+    r = value["cam_r"]+value["L"]
+    ax.plot([0,r],[0,0],color='teal',ls='--')
+    ax.plot([0,r*np.cos(out)],[0,r*np.sin(out)],color='teal',ls='--')
+    ax.plot([0,r*np.cos(out+dw)],[0,r*np.sin(out+dw)],color='teal',ls='--')
+    ax.plot([0,r*np.cos(out+dw+rtn)],[0,r*np.cos(out+dw+rtn)],color='teal',ls='--')
+    ax.plot(value["cam_r"]*np.cos(np.linspace(0, 2*np.pi, 100)), value["cam_r"]*np.sin(np.linspace(0, 2*np.pi, 100)), color='r', linestyle='--')
+    ax.set_aspect('equal', adjustable='box')
+    plt.show()
 
 
 
