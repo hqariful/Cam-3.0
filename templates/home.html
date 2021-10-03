@@ -1,6 +1,14 @@
 {% extends "layout.html" %}
 
 {% block content %}
+<div class="container"><div class="alert alert-secondary" role="alert">
+    <ul>
+        <li>All angle must be in degrees</li>
+        <li>Make sure sum of Outstoke, Dwell, and Returnstroke angles are less than 360 degrees</li>
+        <li>Offset radius is optional and defaults to 0</li>
+    </ul>
+</div></div>
+    
     <div class="container"><form action="/" method="POST">
         <div class="input-group mb-3">
             <label class="form-label" for="OutStroke">Out Stroke : </label>
@@ -44,8 +52,8 @@
         </div>
         
         <div class="input-group mb-3">
-            <label class="form-label" for="offset">Offset : </label>
-            <input disabled class="form-control" name = "offset" type="number">
+            <label class="form-label" for="offset">Offset radius: </label>
+            <input class="form-control" name = "offset" type="number">
         </div>
         
         <button class="btn btn-primary" type="submit">Submit</button>

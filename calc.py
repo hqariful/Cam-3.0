@@ -76,8 +76,15 @@ def strand(value):
     #   MAKE RADIAL CAM PROFILE
     row, col = np.shape(sum)
     buf = np.zeros((2,col))
-    buf[0,0:] = (sum[1]+value["cam_r"])*np.cos(sum[0])
-    buf[1,0:] = (sum[1]+value["cam_r"])*np.sin(sum[0])
+    #   CALULATION OF OFFSET
+    f = value["offset"]
+    r = value["cam_r"]
+    # adj = l + np.sqrt(r**2-f**2)
+    # o_ang = np.arctan(f/(sum[1] + np.sqrt(r**2-f**2)))
+    # (r+ay)^2 = f^2 + (sqrt(r^2-f^2)+l^2)^2    
+    # where r+ay is the radius
+    buf[0,0:] = (np.sqrt(f**2 + (sum[1] + np.sqrt(r**2-f**2))**2))*np.cos(sum[0]-np.arctan(f/(sum[1] + np.sqrt(r**2-f**2))))
+    buf[1,0:] = (np.sqrt(f**2 + (sum[1] + np.sqrt(r**2-f**2))**2))*np.sin(sum[0]-np.arctan(f/(sum[1] + np.sqrt(r**2-f**2))))
     sum = np.concatenate((sum,buf),axis=0)
     return sum
 
@@ -91,9 +98,9 @@ def strand(value):
 
 if __name__ == "__main__":
     value = {
-        "L":30,
+        "L":20,
         "cam_r":50,
-        "offset":0,
+        "offset":10,
         "profiles":[
         {
             'type':'outStroke',
@@ -133,12 +140,16 @@ if __name__ == "__main__":
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.plot(cord[2],cord[3])
+    f = value['offset']
+    of_ang = np.arcsin(f/value["cam_r"])
+    #-------plotting angles mark----------
     r = value["cam_r"]+value["L"]
-    ax.plot([0,r],[0,0],color='teal',ls='--')
-    ax.plot([0,r*np.cos(out)],[0,r*np.sin(out)],color='teal',ls='--')
-    ax.plot([0,r*np.cos(out+dw)],[0,r*np.sin(out+dw)],color='teal',ls='--')
-    ax.plot([0,r*np.cos(out+dw+rtn)],[0,r*np.cos(out+dw+rtn)],color='teal',ls='--')
+    ax.plot([0,r*np.cos(0-of_ang)],[0,r*np.sin(0-of_ang)],color='teal',ls='--') #angle 0
+    ax.plot([0,r*np.cos(out-of_ang)],[0,r*np.sin(out-of_ang)],color='teal',ls='--') #angle between outstroke and 0
+    ax.plot([0,r*np.cos(out+dw-of_ang)],[0,r*np.sin(out+dw-of_ang)],color='teal',ls='--') #angle between outstroke and dwell
+    ax.plot([0,r*np.cos(out+dw+rtn-of_ang)],[0,r*np.sin(out+dw+rtn-of_ang)],color='teal',ls='--') #angle between dwell and rtnstroke
     ax.plot(value["cam_r"]*np.cos(np.linspace(0, 2*np.pi, 100)), value["cam_r"]*np.sin(np.linspace(0, 2*np.pi, 100)), color='r', linestyle='--')
+    ax.plot(value["offset"]*np.cos(np.linspace(0, 2*np.pi, 100)), value["offset"]*np.sin(np.linspace(0, 2*np.pi, 100)), color='r', linestyle='--')
     ax.set_aspect('equal', adjustable='box')
     plt.show()
 
