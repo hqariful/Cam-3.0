@@ -1,6 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
+from grapher import grapher
 
 
 #making follower strand
@@ -54,6 +53,14 @@ def strand(value):
             else:
                 cord[1,0:] = L/2+L/2*np.cos(np.pi/i["deg"]*x)
             return cord
+            #----------CYLOIDAL MOTION-------------
+        elif i["motion"] == "cyc":
+            print(i["deg"],i["motion"])
+            if i["type"] == "outStroke":
+                cord[1,0:] = x*L/i["deg"] - L/(2*np.pi)*np.sin(x*2*np.pi/i["deg"])
+            else:
+                cord[1,0:] = (1-x/i["deg"])*L + L/(2*np.pi)*np.sin(x*2*np.pi/i["deg"])
+            return cord
 
     #------------------------------loop for types-----------------------------
     firstTime = True        #to initiate first follower strand
@@ -105,7 +112,7 @@ if __name__ == "__main__":
         {
             'type':'outStroke',
             'deg':np.deg2rad(30),
-            'motion':'const_a',
+            'motion':'cyc',
             "pnt":50
         },
         {
@@ -137,21 +144,8 @@ if __name__ == "__main__":
     #   2ND PARAMETER DEFINES IF WE WANT CAM PROFILE OR FOLLOWER DISPLACEMENT 
     #   >> TRUE MEANS CAM PROFILE
     cord = strand(value)
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    ax.plot(cord[2],cord[3])
-    f = value['offset']
-    of_ang = np.arcsin(f/value["cam_r"])
-    #-------plotting angles mark----------
-    r = value["cam_r"]+value["L"]
-    ax.plot([0,r*np.cos(0-of_ang)],[0,r*np.sin(0-of_ang)],color='teal',ls='--') #angle 0
-    ax.plot([0,r*np.cos(out-of_ang)],[0,r*np.sin(out-of_ang)],color='teal',ls='--') #angle between outstroke and 0
-    ax.plot([0,r*np.cos(out+dw-of_ang)],[0,r*np.sin(out+dw-of_ang)],color='teal',ls='--') #angle between outstroke and dwell
-    ax.plot([0,r*np.cos(out+dw+rtn-of_ang)],[0,r*np.sin(out+dw+rtn-of_ang)],color='teal',ls='--') #angle between dwell and rtnstroke
-    ax.plot(value["cam_r"]*np.cos(np.linspace(0, 2*np.pi, 100)), value["cam_r"]*np.sin(np.linspace(0, 2*np.pi, 100)), color='r', linestyle='--')
-    ax.plot(value["offset"]*np.cos(np.linspace(0, 2*np.pi, 100)), value["offset"]*np.sin(np.linspace(0, 2*np.pi, 100)), color='r', linestyle='--')
-    ax.set_aspect('equal', adjustable='box')
-    plt.show()
+    grapher("self","radial",cord,value)
+    
 
 
 
